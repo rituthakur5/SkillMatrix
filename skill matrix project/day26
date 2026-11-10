@@ -1,0 +1,161 @@
+
+import sqlite3
+
+DB_NAME = "skillmatrix.db"
+
+
+def connect_db():
+    return sqlite3.connect(DB_NAME)
+
+
+def add_skill():
+    emp_id = input("Enter Employee ID: ").strip()
+    skill = input("Enter New Skill: ").strip()
+
+    if not skill:
+        print("Skill cannot be empty!")
+        return
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT skills FROM employees WHERE emp_id = ?",
+        (emp_id,)
+    )
+    result = cursor.fetchone()
+
+    if result is None:
+        print("Employee not found!")
+    else:
+        skills = [s.strip() for s in result[0].split(",") if s.strip()]
+
+        if skill.lower() in [s.lower() for s in skills]:
+            print("This skill already exists!")
+        else:
+            skills.append(skill)
+            new_skills = ", ".join(skills)
+
+            cursor.execute(
+                "UPDATE employees SET skills = ? WHERE emp_id = ?",
+                (new_skills, emp_id)
+            )
+            conn.commit()
+            print("New skill added successfully!")
+
+    conn.close()
+
+
+def remove_skill():
+    emp_id = input("Enter Employee ID: ").strip()
+    skill = input("Enter Skill to Remove: ").strip()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT skills FROM employees WHERE emp_id = ?",
+        (emp_id,)
+    )
+    result = cursor.fetchone()
+
+    if result is None:
+        print("Employee not found!")
+    else:
+        skills = [s.strip() for s in result[0].split(",") if s.strip()]
+        updated_skills = [
+            s for s in skills if s.lower() != skill.lower()
+        ]
+
+        if len(updated_skills) == len(skills):
+            print("Skill not found!")
+        else:
+            cursor.execute(
+                "UPDATE employees SET skills = ? WHERE emp_id = ?",
+                (", ".join(updated_skills), emp_id)
+            )
+            conn.commit()
+            print("Skill removed successfully!")
+
+    conn.close()
+
+
+def check_skill():
+    emp_id = input("Enter Employee ID: ").strip()
+    skill = input("Enter Skill to Check: ").strip()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT name, skills FROM employees WHERE emp_id = ?",
+        (emp_id,)
+    )
+    result = cursor.fetchone()
+    conn.close()
+
+    if result is None:
+        print("Employee not found!")
+        return
+
+    name, employee_skills = result
+    skills = [s.strip().lower() for s in employee_skills.split(",")]
+
+    print("Employee Name:", name)
+
+    if skill.lower() in skills:
+        print("Yes! Employee has this skill.")
+    else:
+        print("No! Employee does not have this skill.")
+
+
+def view_all():
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT emp_id, name, skills FROM employees")
+    employees = cursor.fetchall()
+
+    conn.close()
+
+    print("\n===== ALL EMPLOYEES =====")
+
+    if not employees:
+        print("No employees found!")
+        return
+
+    for emp_id, name, skills in employees:
+        print("-----------------------------------")
+        print("Employee ID:", emp_id)
+        print("Name       :", name)
+        print("Skills     :", skills)
+
+
+def main():
+    while True:
+        print("\n===== SkillMatrix Day 26 =====")
+        print("1. Add New Skill")
+        print("2. Remove Employee Skill")
+        print("3. Check Employee Skill")
+        print("4. View All Employees")
+        print("5. Exit")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_skill()
+        elif choice == "2":
+            remove_skill()
+        elif choice == "3":
+            check_skill()
+        elif choice == "4":
+            view_all()
+        elif choice == "5":
+            print("SkillMatrix Day 26 closed.")
+            break
+        else:
+            print("Invalid choice! Try again.")
+
+
+if __name__ == "__main__":
+    main()
