@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMatrix - Recycle Bin</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #243047;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            color: #243b65;
+        }
+
+        .subtitle {
+            color: #68758a;
+            margin: 0;
+        }
+
+        .back-btn {
+            background: #243b65;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 7px;
+            text-decoration: none;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #e8f5e9;
+            color: #236b36;
+            border-radius: 7px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e8edf3;
+        }
+
+        th {
+            background: #edf2fa;
+            color: #243b65;
+        }
+
+        .restore-btn, .delete-btn {
+            border: none;
+            padding: 9px 12px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            margin: 3px;
+        }
+
+        .restore-btn {
+            background: #198754;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 45px 15px;
+            color: #68758a;
+        }
+
+        .empty h2 {
+            color: #243b65;
+        }
+
+        form {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div>
+            <h1>♻️ Recycle Bin</h1>
+            <p class="subtitle">
+                Deleted employees are stored here. You can restore or permanently delete them.
+            </p>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="back-btn">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+
+        {% if employees %}
+
+            <h2>Deleted Employees ({{ employees|length }})</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Skills</th>
+                        <th>Department</th>
+                        <th>Deleted At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee['emp_id'] }}</td>
+                        <td>{{ employee['name'] }}</td>
+                        <td>{{ employee['skills'] }}</td>
+                        <td>
+                            {{ employee['department'] or 'Not Added' }}
+                        </td>
+                        <td>
+                            {{ employee['deleted_at'] or 'Not Available' }}
+                        </td>
+
+                        <td>
+                            <form
+                                method="POST"
+                                action="{{ url_for('restore_employee', emp_id=employee['emp_id']) }}"
+                                onsubmit="return confirm('Restore this employee?');"
+                            >
+                                <button type="submit" class="restore-btn">
+                                    Restore
+                                </button>
+                            </form>
+
+                            <form
+                                method="POST"
+                                action="{{ url_for('permanently_delete_employee', emp_id=employee['emp_id']) }}"
+                                onsubmit="return confirm('Permanently delete this employee? This cannot be undone.');"
+                            >
+                                <button type="submit" class="delete-btn">
+                                    Delete Forever
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        {% else %}
+
+            <div class="empty">
+                <h2>🎉 Recycle Bin is Empty!</h2>
+                <p>No deleted employees found.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

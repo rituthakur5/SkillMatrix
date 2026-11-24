@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile - SkillMatrix</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f3f0ff;
+            color: #333;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px #00000012;
+        }
+
+        h2 {
+            text-align: center;
+            color: #5636a5;
+        }
+
+        .photo-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .profile-photo, .default-photo {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #7655c8;
+        }
+
+        .default-photo {
+            background: #7655c8;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            font-weight: bold;
+        }
+
+        .photo-button, .main-button {
+            padding: 9px 15px;
+            background: #7655c8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .photo-button {
+            display: block;
+            margin: 10px auto;
+        }
+
+        .photo-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 12px auto;
+        }
+
+        .option-button {
+            padding: 8px 14px;
+            border: 1px solid #7655c8;
+            background: white;
+            color: #5636a5;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .remove-button {
+            background: none;
+            border: none;
+            color: #d33;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .details { margin-top: 25px; }
+
+        .details p {
+            padding: 12px;
+            background: #f7f5ff;
+            border-radius: 7px;
+            margin: 9px 0;
+        }
+
+        .skills { line-height: 1.8; }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .message {
+            text-align: center;
+            color: green;
+        }
+
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Employee Profile</h2>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p class="message">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="photo-section">
+
+        {% if employee['profile_pic'] %}
+            <img
+                class="profile-photo"
+                src="{{ url_for('static', filename='profile_pics/' ~ employee['profile_pic']) }}"
+                alt="Profile Picture"
+            >
+        {% else %}
+            <div class="default-photo">
+                {{ employee['name'][0]|upper }}
+            </div>
+        {% endif %}
+
+        <button type="button" class="photo-button"
+                onclick="togglePhotoOptions()">
+            Profile Picture
+        </button>
+
+        <div id="photoOptions" class="photo-options" hidden>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="upload">
+                <input type="file" id="galleryInput"
+                       name="photo" accept="image/*" hidden>
+
+                <button type="button" class="option-button"
+                        onclick="document.getElementById('galleryInput').click()">
+                    Select Gallery
+                </button>
+            </form>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="upload">
+                <input type="file" id="cameraInput"
+                       name="photo" accept="image/*"
+                       capture="environment" hidden>
+
+                <button type="button" class="option-button"
+                        onclick="document.getElementById('cameraInput').click()">
+                    Camera
+                </button>
+            </form>
+
+        </div>
+
+        {% if employee['profile_pic'] %}
+            <form method="POST"
+                  onsubmit="return confirm('Remove profile picture?')">
+                <input type="hidden" name="action" value="remove">
+                <button type="submit" class="remove-button">
+                    Remove Picture
+                </button>
+            </form>
+        {% endif %}
+
+    </div>
+
+    <div class="details">
+
+        <p><strong>Employee ID:</strong>
+            {{ employee['emp_id'] }}
+        </p>
+
+        <p><strong>Employee Name:</strong>
+            {{ employee['name'] }}
+        </p>
+
+        <p><strong>Department:</strong>
+            {{ employee['department'] or 'Not Added' }}
+        </p>
+
+        <p><strong>Designation:</strong>
+            {{ employee['designation'] or 'Not Added' }}
+        </p>
+
+        <p class="skills">
+            <strong>Skills:</strong><br>
+            {{ employee['skills'] }}
+        </p>
+
+        <p><strong>Total Skills:</strong>
+            {{ total_skills }}
+        </p>
+
+    </div>
+
+    <div class="buttons">
+
+        <a href="{{ url_for('edit_employee', emp_id=employee['emp_id']) }}"
+           class="main-button">
+            Edit Employee
+        </a>
+
+        <a href="{{ url_for('view_employees') }}"
+           class="main-button">
+            Back to Employees
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+    function togglePhotoOptions() {
+        const options = document.getElementById("photoOptions");
+        options.hidden = !options.hidden;
+    }
+
+    document.getElementById("galleryInput").addEventListener("change", function () {
+        if (this.files.length > 0) {
+            this.form.submit();
+        }
+    });
+
+    document.getElementById("cameraInput").addEventListener("change", function () {
+        if (this.files.length > 0) {
+            this.form.submit();
+        }
+    });
+</script>
+
+</body>
+</html>

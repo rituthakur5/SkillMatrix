@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee - SkillMatrix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f0ff;
+            padding: 25px;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #00000012;
+        }
+        h2 { text-align: center; color: #5636a5; }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        textarea { resize: vertical; }
+        button, .back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            background: #7655c8;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .error { color: red; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>+ Add New Employee</h2>
+    <p>Enter employee details to add them to SkillMatrix.</p>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <label>Employee ID</label>
+        <input type="text" name="emp_id" placeholder="Example: E105" required>
+
+        <label>Employee Name</label>
+        <input type="text" name="name" placeholder="Enter employee name" required>
+
+        <label>Department</label>
+        <input type="text" name="department" placeholder="Example: IT, HR, Marketing" required>
+
+        <label>Designation</label>
+        <input type="text" name="designation" placeholder="Example: Software Developer" required>
+
+        <label>Employee Skills</label>
+        <textarea name="skills" rows="3" placeholder="Example: Python, SQL, Excel" required></textarea>
+
+        <button type="submit">Save Employee</button>
+    </form>
+
+    <a class="back" href="{{ url_for('index') }}">Back to Dashboard</a>
+</div>
+
+</body>
+</html>

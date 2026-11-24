@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMatrix Reports</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            margin: 0;
+            padding: 30px;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #263b80;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+
+        .stat {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .stat h2 {
+            color: #263b80;
+            margin: 0 0 10px;
+        }
+
+        .stat p {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .section {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .downloads {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .downloads a {
+            display: inline-block;
+            padding: 12px 18px;
+            background: #263b80;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .downloads a:hover {
+            background: #18285c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #edf0fa;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #263b80;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>SkillMatrix Reports</h1>
+    <p>View employee, skills and learning goals reports.</p>
+
+    <div class="stats">
+        <div class="stat">
+            <h2>Total Employees</h2>
+            <p>{{ total_employees }}</p>
+        </div>
+
+        <div class="stat">
+            <h2>Total Goals</h2>
+            <p>{{ total_goals }}</p>
+        </div>
+
+        <div class="stat">
+            <h2>Completed Goals</h2>
+            <p>{{ completed_goals }}</p>
+        </div>
+
+        <div class="stat">
+            <h2>Pending Goals</h2>
+            <p>{{ pending_goals }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Download Reports (CSV)</h2>
+        <p>Download reports and open them in Microsoft Excel.</p>
+
+        <div class="downloads">
+            <a href="{{ url_for('export_employees') }}">Download Employee Report</a>
+            <a href="{{ url_for('export_goals') }}">Download Learning Goals Report</a>
+            <a href="{{ url_for('export_skills') }}">Download Skills Report</a>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Employee Report</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Skills</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td>{{ employee['emp_id'] }}</td>
+                    <td>{{ employee['name'] }}</td>
+                    <td>{{ employee['skills'] or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">No employees found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Learning Goals Report</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Goal</th>
+                    <th>Target Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for goal in goals %}
+                <tr>
+                    <td>{{ goal['name'] or goal['emp_id'] or '-' }}</td>
+                    <td>{{ goal['title'] or goal['goal'] or '-' }}</td>
+                    <td>{{ goal['target_date'] or '-' }}</td>
+                    <td>{{ goal['status'] or 'Pending' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">No learning goals found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a class="back" href="{{ url_for('index') }}">Back to Dashboard</a>
+
+</div>
+</body>
+</html>

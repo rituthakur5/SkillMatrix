@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Recommendations - SkillMatrix</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            margin: 0;
+            padding: 30px;
+            color: #263238;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+
+        h1 { color: #263b80; margin-top: 0; }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            margin-top: 22px;
+            padding: 12px 22px;
+            background: #263b80;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover { background: #18285c; }
+
+        .result {
+            margin-top: 28px;
+            padding: 20px;
+            background: #f5f7ff;
+            border-radius: 8px;
+        }
+
+        .course {
+            background: white;
+            border: 1px solid #dce2f5;
+            border-radius: 7px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+
+        .message {
+            padding: 12px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #263b80;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>Training Recommendations</h1>
+    <p>Find suitable training courses based on an employee's skill gaps.</p>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('training_recommendations') }}">
+
+        <label for="emp_id">Select Employee</label>
+
+        <select name="emp_id" id="emp_id" required>
+            <option value="">-- Select Employee --</option>
+
+            {% for employee in employees %}
+                <option value="{{ employee['emp_id'] }}"
+                    {% if selected_employee and selected_employee['emp_id'] == employee['emp_id'] %}
+                        selected
+                    {% endif %}>
+                    {{ employee['name'] }} ({{ employee['emp_id'] }})
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="required_skills">Required Skills</label>
+
+        <input
+            type="text"
+            id="required_skills"
+            name="required_skills"
+            placeholder="Example: Python, SQL, Machine Learning"
+            value="{{ required_skills or '' }}"
+            required
+        >
+
+        <button type="submit">Get Recommendations</button>
+    </form>
+
+    {% if selected_employee %}
+        <div class="result">
+
+            <h2>Results for {{ selected_employee['name'] }}</h2>
+
+            <p>
+                <strong>Employee ID:</strong>
+                {{ selected_employee['emp_id'] }}
+            </p>
+
+            <p>
+                <strong>Current Skills:</strong>
+                {{ selected_employee['skills'] or 'No skills added' }}
+            </p>
+
+            {% if missing_skills %}
+                <h3>Missing Skills</h3>
+                <p>{{ missing_skills | join(', ') }}</p>
+
+                <h3>Recommended Training Courses</h3>
+
+                {% for item in recommendations %}
+                    <div class="course">
+                        <strong>Skill:</strong> {{ item.skill }}<br>
+                        <strong>Recommended Course:</strong> {{ item.course }}
+                    </div>
+                {% endfor %}
+
+            {% else %}
+                <h3>Great! No Skill Gap Found.</h3>
+                <p>This employee already has all the required skills.</p>
+            {% endif %}
+
+        </div>
+    {% endif %}
+
+    <a class="back" href="{{ url_for('index') }}">Back to Dashboard</a>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMatrix - All Employees</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f2fb;
+            padding: 30px 15px;
+            color: #29243b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 { color: #5636a5; }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        .message {
+            background: #e8f8ed;
+            color: #18753a;
+            padding: 12px;
+            border-radius: 7px;
+            margin: 12px 0;
+        }
+
+        /* Filter section */
+        .filter-box {
+            background: #f7f5ff;
+            border: 1px solid #e7e0fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .filter-box h3 {
+            color: #5636a5;
+            margin-bottom: 15px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d8d2e8;
+            border-radius: 7px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .filter-btn {
+            background: #5636a5;
+        }
+
+        .reset-btn {
+            background: #555;
+        }
+
+        .result-count {
+            margin: 18px 0 10px;
+            color: #5636a5;
+            font-weight: bold;
+        }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #5636a5;
+            color: white;
+        }
+
+        tr:hover { background: #f8f6ff; }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 13px;
+            margin: 5px 3px;
+            border-radius: 7px;
+            text-decoration: none;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .profile { background: #287b68; }
+        .edit { background: #e69b20; }
+        .delete { background: #dc3545; }
+        .add { background: #5636a5; }
+        .export { background: #198754; }
+        .recycle { background: #287b68; }
+        .back { background: #555; }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+
+        .actions { white-space: nowrap; }
+
+        .employee-info {
+            color: #777;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            .container {
+                padding: 18px;
+            }
+
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>SkillMatrix - All Employees</h1>
+    <p class="subtitle">
+        Manage, filter and explore all employee records.
+    </p>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <!-- Department and Designation Filters -->
+    <div class="filter-box">
+
+        <h3>🔎 Filter Employees</h3>
+
+        <form method="GET"
+              action="{{ url_for('view_employees') }}"
+              class="filter-form">
+
+            <div class="filter-group">
+                <label for="department">Department</label>
+
+                <select name="department" id="department">
+                    <option value="">All Departments</option>
+
+                    {% for dept in departments %}
+                    <option value="{{ dept['department'] }}"
+                        {% if selected_department == dept['department'] %}
+                            selected
+                        {% endif %}>
+                        {{ dept['department'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="designation">Designation</label>
+
+                <select name="designation" id="designation">
+                    <option value="">All Designations</option>
+
+                    {% for des in designations %}
+                    <option value="{{ des['designation'] }}"
+                        {% if selected_designation == des['designation'] %}
+                            selected
+                        {% endif %}>
+                        {{ des['designation'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn filter-btn">
+                Apply Filters
+            </button>
+
+            <a href="{{ url_for('view_employees') }}"
+               class="btn reset-btn">
+                Reset Filters
+            </a>
+
+        </form>
+    </div>
+
+    <div class="result-count">
+        Showing {{ total_employees }} employee(s)
+    </div>
+
+    {% if employees %}
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Skills</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+
+                    <td>{{ employee['emp_id'] }}</td>
+
+                    <td>{{ employee['name'] }}</td>
+
+                    <td>
+                        {{ employee['department'] or 'Not Added' }}
+                    </td>
+
+                    <td>
+                        {{ employee['designation'] or 'Not Added' }}
+                    </td>
+
+                    <td>{{ employee['skills'] }}</td>
+
+                    <td class="actions">
+
+                        <a class="btn profile"
+                           href="{{ url_for('employee_profile', emp_id=employee['emp_id']) }}">
+                            View Profile
+                        </a>
+
+                        <a class="btn edit"
+                           href="{{ url_for('edit_employee', emp_id=employee['emp_id']) }}">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                              action="{{ url_for('delete_employee', emp_id=employee['emp_id']) }}"
+                              style="display:inline;"
+                              onsubmit="return confirm('Are you sure you want to delete this employee?');">
+
+                            <button type="submit" class="btn delete">
+                                Delete
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="empty">
+        <h3>No employees found!</h3>
+        <p>Try changing your department or designation filters.</p>
+    </div>
+
+    {% endif %}
+
+    <br>
+
+    <a href="{{ url_for('add_employee') }}" class="btn add">
+        + Add Employee
+    </a>
+
+    <a href="{{ url_for('export_employees') }}" class="btn export">
+        Download Employee CSV
+    </a>
+
+    <a href="{{ url_for('recycle_bin') }}" class="btn recycle">
+        Recycle Bin
+    </a>
+
+    <a href="{{ url_for('index') }}" class="btn back">
+        Back to Dashboard
+    </a>
+
+</div>
+</body>
+</html>

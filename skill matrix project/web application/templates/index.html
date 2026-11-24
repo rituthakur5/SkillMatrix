@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMatrix Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            color: #263238;
+        }
+
+        header {
+            background: #263b80;
+            color: white;
+            padding: 25px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .stat-card h3 {
+            color: #263b80;
+            margin-top: 0;
+        }
+
+        .stat-card p {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            margin: 30px 0 18px;
+            color: #263b80;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 23px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .feature-card h3 {
+            color: #263b80;
+            margin-top: 0;
+        }
+
+        .feature-card p {
+            color: #606b78;
+            min-height: 42px;
+            line-height: 1.5;
+        }
+
+        .feature-card a {
+            display: inline-block;
+            background: #263b80;
+            color: white;
+            text-decoration: none;
+            padding: 11px 17px;
+            border-radius: 6px;
+        }
+
+        .feature-card a:hover {
+            background: #18285c;
+        }
+
+        .employee-section {
+            background: white;
+            margin-top: 30px;
+            padding: 22px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #edf0fa;
+        }
+
+        .message {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        @media(max-width: 600px) {
+            header {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SkillMatrix</h1>
+    <p>Employee Skill Management System</p>
+</header>
+
+<div class="container">
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <h2>Dashboard Overview</h2>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <h3>Total Employees</h3>
+            <p>{{ total_employees }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Learning Goals</h3>
+            <p>{{ total_goals }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Completed Goals</h3>
+            <p>{{ completed_goals }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Pending Goals</h3>
+            <p>{{ pending_goals }}</p>
+        </div>
+
+    </div>
+
+    <h2 class="section-title">Project Features</h2>
+
+    <div class="features">
+
+        <div class="feature-card">
+            <h3>Learning Goals</h3>
+            <p>Add, view and manage employee learning goals.</p>
+            <a href="{{ url_for('learning_goals') }}">Open Learning Goals</a>
+        </div>
+
+        <div class="feature-card">
+            <h3>Employee Progress</h3>
+            <p>Track employee learning progress and completion.</p>
+            <a href="{{ url_for('employee_progress') }}">View Progress</a>
+        </div>
+
+        <div class="feature-card">
+            <h3>Skill Gap Analysis</h3>
+            <p>Find missing skills by comparing required and current skills.</p>
+            <a href="{{ url_for('skill_gap') }}">Analyze Skills</a>
+        </div>
+
+        <div class="feature-card">
+            <h3>Training Recommendations</h3>
+            <p>Find recommended courses for missing employee skills.</p>
+            <a href="{{ url_for('training_recommendations') }}">View Recommendations</a>
+        </div>
+
+        <div class="feature-card">
+            <h3>Reports & CSV Export</h3>
+            <p>View reports and download employee, skills and goals data.</p>
+            <a href="{{ url_for('reports') }}">Open Reports</a>
+        </div>
+
+    </div>
+
+    <div class="employee-section">
+        <h2>All Employees</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Skills</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td>{{ employee['emp_id'] }}</td>
+                    <td>{{ employee['name'] }}</td>
+                    <td>{{ employee['skills'] or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">No employees found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer>
+    SkillMatrix Employee Skill Management System
+</footer>
+
+</body>
+</html>

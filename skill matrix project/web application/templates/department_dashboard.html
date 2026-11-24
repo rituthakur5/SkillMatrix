@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMatrix - Department Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #263445;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #182b49;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-top: 7px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #263f70;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 8px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 13px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.05);
+        }
+
+        .stat-card p {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h2 {
+            font-size: 30px;
+            color: #263f70;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 13px;
+            padding: 25px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.05);
+        }
+
+        .panel h2 {
+            color: #182b49;
+            margin-bottom: 8px;
+        }
+
+        .panel-subtitle {
+            color: #718096;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .department-row {
+            margin-bottom: 23px;
+        }
+
+        .department-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 9px;
+            font-size: 15px;
+        }
+
+        .department-name {
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .department-count {
+            color: #52647b;
+            white-space: nowrap;
+        }
+
+        .bar-background {
+            width: 100%;
+            height: 13px;
+            background: #edf1f7;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4267b2, #6d8ed2);
+            border-radius: 20px;
+            min-width: 3px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px 10px;
+            color: #718096;
+        }
+
+        .footer {
+            margin-top: 22px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .footer a {
+            text-decoration: none;
+            background: #263f70;
+            color: white;
+            padding: 11px 17px;
+            border-radius: 8px;
+        }
+
+        .footer a.secondary {
+            background: #e7edf7;
+            color: #263f70;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 16px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <div>
+                <h1>Department Dashboard</h1>
+                <p class="subtitle">
+                    View employee distribution across departments.
+                </p>
+            </div>
+
+            <a href="{{ url_for('index') }}" class="back-btn">
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <p>Total Employees</p>
+                <h2>{{ total_employees }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Total Departments</p>
+                <h2>{{ total_departments }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Employees with Department</p>
+                <h2>{{ assigned_employees }}</h2>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Department-wise Employee Count</h2>
+            <p class="panel-subtitle">
+                Bar chart showing the number of employees in each department.
+            </p>
+
+            {% if department_data %}
+
+                {% for item in department_data %}
+                    <div class="department-row">
+
+                        <div class="department-info">
+                            <span class="department-name">
+                                {{ item.name }}
+                            </span>
+
+                            <span class="department-count">
+                                {{ item.count }} employee(s)
+                                ({{ item.percentage }}%)
+                            </span>
+                        </div>
+
+                        <div class="bar-background">
+                            <div
+                                class="bar-fill"
+                                style="width: {{ item.percentage }}%;">
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty">
+                    <h3>No employees found</h3>
+                    <p>Add employees to see department statistics.</p>
+                </div>
+
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <a href="{{ url_for('view_employees') }}">
+                View All Employees
+            </a>
+
+            <a href="{{ url_for('add_employee') }}" class="secondary">
+                + Add Employee
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>
